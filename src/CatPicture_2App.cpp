@@ -10,7 +10,7 @@ using namespace std;
 class CatPicture_2App : public AppBasic {
   public:
 	void setup();
-	void mouseDown( MouseEvent event );	
+	void mouseDown( MouseEvent event, uint8_t* dataArray );	
 	void update();
 	void draw();
 	void prepareSettings(Settings *settings);   //set size of window
@@ -31,6 +31,10 @@ class CatPicture_2App : public AppBasic {
 	Color8u colorDoor;
 	Color8u colorChimney;
 	Color8u colorSky;
+	float circle_x;
+	float circle_y;
+	int mouse_x;
+	int mouse_y;
 };
 
 
@@ -216,10 +220,18 @@ void CatPicture_2App::setup()
 	colorSky.r = 0;
 	colorSky.g = 162;
 	colorSky.b = 232;
+
+	circle_x = 120;
+	circle_y = 145;
 }
 
-void CatPicture_2App::mouseDown( MouseEvent event )
+void CatPicture_2App::mouseDown( MouseEvent event, uint8_t* dataArray )
 {
+	mouse_x = event.getX();
+	mouse_y = event.getY();
+	if(event.isLeft()){
+		drawCircle(dataArray, 20, mouse_x, mouse_y);
+	}
 }
 
 void CatPicture_2App::update()
@@ -274,9 +286,10 @@ void CatPicture_2App::update()
 	drawTriangle(dataArray, 255, 143, 50, 348, 460, 348, colorRoof);
 
 	//draw circle of smoke
-	drawCircle(dataArray, 20, 120, 145);
-	drawCircle(dataArray, 35, 200, 100);
-	drawCircle(dataArray, 45, 310, 50);
+	drawCircle(dataArray, 20, circle_x, circle_y);
+	circle_y = 30*cos(circle_x/20)+130;
+	circle_x += 2;
+
 
 }
 
