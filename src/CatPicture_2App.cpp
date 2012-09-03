@@ -10,7 +10,7 @@ using namespace std;
 class CatPicture_2App : public AppBasic {
   public:
 	void setup();
-	void mouseDown( MouseEvent event, uint8_t* dataArray );	
+	void mouseDown( MouseEvent event );	
 	void update();
 	void draw();
 	void prepareSettings(Settings *settings);   //set size of window
@@ -37,37 +37,21 @@ class CatPicture_2App : public AppBasic {
 	int mouse_y;
 };
 
-
 //do blur
 void CatPicture_2App::blur(uint8_t* pixels){
 	for(int x=0; x<=600; x++){
 		for(int y=0; y<=600; y++){
-			//the first line
-			if(y == 0){
-				if(x == 0){
-				  pixels[3*(x+y*600)] = (pixels[3*(x+y*600)] + pixels[3*((x+1)+y*600)] + pixels[3*((x+2)+y*600)] + pixels[3*(x+(y+1)*600)] + pixels[3*((x+1)+(y+1)*600)] + pixels[3*((x+2)+(y+1)*600)] + pixels[3*(x+(y+2)*600)] + pixels[3*((x+1)+(y+2)*600)] + pixels[3*((x+2)+(y+2)*600)])/9;
-				  pixels[3*(x+y*600)+1] = (pixels[3*(x+y*600)+1] + pixels[3*((x+1)+y*600)+1] + pixels[3*((x+2)+y*600)+1] + pixels[3*(x+(y+1)*600)+1] + pixels[3*((x+1)+(y+1)*600)+1] + pixels[3*((x+2)+(y+1)*600)+1] + pixels[3*(x+(y+2)*600)+1] + pixels[3*((x+1)+(y+2)*600)+1] + pixels[3*((x+2)+(y+2)*600)+1])/9;
-				  pixels[3*(x+y*600)+2] = (pixels[3*(x+y*600)+2] + pixels[3*((x+1)+y*600)+2] + pixels[3*((x+2)+y*600)+2] + pixels[3*(x+(y+1)*600)+2] + pixels[3*((x+1)+(y+1)*600)+2] + pixels[3*((x+2)+(y+1)*600)+2] + pixels[3*(x+(y+2)*600)+2] + pixels[3*((x+1)+(y+2)*600)+2] + pixels[3*((x+2)+(y+2)*600)+2])/9;
-				}
-				else if(x == 600){
-				  pixels[3*(x+y*600)] = (pixels[3*(x+y*600)] + pixels[3*((x-1)+y*600)] + pixels[3*((x-2)+y*600)] + pixels[3*(x+(y-1)*600)] + pixels[3*((x-1)+(y-1)*600)] + pixels[3*((x-2)+(y-1)*600)] + pixels[3*(x+(y-2)*600)] + pixels[3*((x-1)+(y-2)*600)] + pixels[3*((x-2)+(y-2)*600)])/9;
-				  pixels[3*(x+y*600)+1] = (pixels[3*(x+y*600)+1] + pixels[3*((x-1)+y*600)+1] + pixels[3*((x-2)+y*600)+1] + pixels[3*(x+(y-1)*600)+1] + pixels[3*((x-1)+(y-1)*600)+1] + pixels[3*((x-2)+(y-1)*600)+1] + pixels[3*(x+(y-2)*600)+1] + pixels[3*((x-1)+(y-2)*600)+1] + pixels[3*((x-2)+(y-2)*600)+1])/9;
-				  pixels[3*(x+y*600)+2] = (pixels[3*(x+y*600)+2] + pixels[3*((x-1)+y*600)+2] + pixels[3*((x-2)+y*600)+2] + pixels[3*(x+(y-1)*600)+2] + pixels[3*((x-1)+(y-1)*600)+2] + pixels[3*((x-2)+(y-1)*600)+2] + pixels[3*(x+(y-2)*600)+2] + pixels[3*((x-1)+(y-2)*600)+2] + pixels[3*((x-2)+(y-2)*600)+2])/9;
-				}
-				else{
-				  pixels[3*(x+y*600)] = (pixels[3*(x+y*600)] + pixels[3*((x+1)+y*600)] + pixels[3*((x-1)+y*600)] + pixels[3*(x+(y+1)*600)] + pixels[3*((x+1)+(y+1)*600)] + pixels[3*((x-1)+(y+1)*600)] + pixels[3*(x+(y+2)*600)] + pixels[3*((x+1)+(y+2)*600)] + pixels[3*((x-1)+(y+2)*600)])/9;
-				  pixels[3*(x+y*600)+1] = (pixels[3*(x+y*600)+1] + pixels[3*((x+1)+y*600)+1] + pixels[3*((x-1)+y*600)+1] + pixels[3*(x+(y+1)*600)+1] + pixels[3*((x+1)+(y+1)*600)+1] + pixels[3*((x-1)+(y+1)*600)+1] + pixels[3*(x+(y+2)*600)+1] + pixels[3*((x+1)+(y+2)*600)+1] + pixels[3*((x+2)+(y+2)*600)+1])/9;
-				  pixels[3*(x+y*600)+2] = (pixels[3*(x+y*600)+2] + pixels[3*((x+1)+y*600)+2] + pixels[3*((x+2)+y*600)+2] + pixels[3*(x+(y+1)*600)+2] + pixels[3*((x+1)+(y+1)*600)+2] + pixels[3*((x+2)+(y+1)*600)+2] + pixels[3*(x+(y+2)*600)+2] + pixels[3*((x+1)+(y+2)*600)+2] + pixels[3*((x+2)+(y+2)*600)+2])/9;
-				}
+			if(x > 0 && x < 600 && y > 0 && y < 599){
+				pixels[3*(x+y*600)] = (pixels[3*(x+y*600)] + pixels[3*((x+1)+y*600)] + pixels[3*((x-1)+y*600)] + pixels[3*((x-1)+(y-1)*600)] + pixels[3*(x+(y-1)*600)] + pixels[3*((x+1)+(y-1)*600)] + pixels[3*((x-1)+(y+1)*600)] + pixels[3*(x+(y+1)*600)] + pixels[3*((x+1)+(y+1)*600)])/9;
+				pixels[3*(x+y*600)+1] = (pixels[3*(x+y*600)+1] + pixels[3*((x+1)+y*600)+2] + pixels[3*((x-1)+y*600)+1] + pixels[3*((x-1)+(y-1)*600)+1] + pixels[3*(x+(y-1)*600)+1] + pixels[3*((x+1)+(y-1)*600)+1] + pixels[3*((x-1)+(y+1)*600)+1] + pixels[3*(x+(y+1)*600)+1] + pixels[3*((x+1)+(y+1)*600)]+1)/9;
+				pixels[3*(x+y*600)+2] = (pixels[3*(x+y*600)+1] + pixels[3*((x+1)+y*600)+2] + pixels[3*((x-1)+y*600)+2] + pixels[3*((x-1)+(y-1)*600)+2] + pixels[3*(x+(y-1)*600)+2] + pixels[3*((x+1)+(y-1)*600)+2] + pixels[3*((x-1)+(y+1)*600)+2] + pixels[3*(x+(y+1)*600)+2] + pixels[3*((x+1)+(y+1)*600)]+2)/9;
 			}
-
-			
 
 		}
 	}
 }
 
-//draw horizonal line
+//Meet one of main goals: draw horizonal line
 void CatPicture_2App::drawHorizonalLine(uint8_t* pixels, int start, int end, int row){
 	int draw;
 	for(draw = start; draw <= end; draw++){
@@ -77,7 +61,7 @@ void CatPicture_2App::drawHorizonalLine(uint8_t* pixels, int start, int end, int
 	}
 }
 
-//draw vertical line
+//Meet one of main goals: draw vertical line
 void CatPicture_2App::drawVerticalLine(uint8_t* pixels, int start, int end, int col){
 	int draw;
 	for(draw = start; draw <=end; draw++){
@@ -87,7 +71,7 @@ void CatPicture_2App::drawVerticalLine(uint8_t* pixels, int start, int end, int 
 	}
 }
 
-//draw rectangle
+//Meet one of main goals: draw rectangle
 void CatPicture_2App::drawRectangle(uint8_t* pixels, int x1, int y1, int x2, int y2, Color8u color){
 	int draw;
 
@@ -139,7 +123,7 @@ void CatPicture_2App::paintChimney(uint8_t* pixels, Color8u color){
 	}
 }
 
-//draw triangle
+//Meet one of main goals: draw triangle
 void CatPicture_2App::drawTriangle(uint8_t* pixels, int x1, int y1, int x2, int y2, int x3, int y3, Color8u color){
 	//draw the first edge
 	int draw_x2 = x2;
@@ -175,6 +159,7 @@ void CatPicture_2App::drawTriangle(uint8_t* pixels, int x1, int y1, int x2, int 
 	
 }
 
+//Meet one of main goals: Draw circle
 void CatPicture_2App::drawCircle(uint8_t* pixels, float radius, float center_x, float center_y){
 	
 	for(int y=0; y<=600; y++){
@@ -189,8 +174,6 @@ void CatPicture_2App::drawCircle(uint8_t* pixels, float radius, float center_x, 
 	}
 
 }
-
-
 
 void CatPicture_2App::setup()
 {
@@ -225,12 +208,13 @@ void CatPicture_2App::setup()
 	circle_y = 145;
 }
 
-void CatPicture_2App::mouseDown( MouseEvent event, uint8_t* dataArray )
+//Meet one of stretch goals: mouse interaction
+void CatPicture_2App::mouseDown( MouseEvent event )
 {
 	mouse_x = event.getX();
 	mouse_y = event.getY();
 	if(event.isLeft()){
-		drawCircle(dataArray, 20, mouse_x, mouse_y);
+		console() << mouse_x <<" "<< mouse_y << std::endl;
 	}
 }
 
@@ -287,8 +271,14 @@ void CatPicture_2App::update()
 
 	//draw circle of smoke
 	drawCircle(dataArray, 20, circle_x, circle_y);
+
+	//Meet one of stretch goals: Animation
 	circle_y = 30*cos(circle_x/20)+130;
 	circle_x += 2;
+	if(circle_x > 600)
+		circle_x = 120;
+
+	blur(dataArray);
 
 
 }
