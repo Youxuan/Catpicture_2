@@ -21,6 +21,7 @@ class CatPicture_2App : public AppBasic {
 	void drawCircle(uint8_t* pixels, float radius, float center_x, float center_y);    //draw circle
 	void paintChimney(uint8_t* pixels, Color8u color);   //paint chimney
 	void blur(uint8_t* pixels);   //do blur
+	void tint(uint8_t* pixels, int row, int col);
 
   private:
 	Surface* mySurface;  //The Surface object I modify array on
@@ -36,6 +37,20 @@ class CatPicture_2App : public AppBasic {
 	int mouse_x;
 	int mouse_y;
 };
+
+//tint
+void CatPicture_2App::tint(uint8_t* pixels, int row, int col) {
+		for (float x=row-50; x<row+50; x++) {
+			for (float y=col-50; y<col+50; y++) {
+				if(((row-x)*(row-x)+(col-y)*(col-y))<=(30*30)){
+					pixels[(int)(3*(x+(y*600)))] = 255;
+					pixels[(int)(3*(x+(y*600)))+1] = 255;
+					pixels[(int)(3*(x+(y*600)))+2] = 255;
+				}
+			}
+		}
+
+	}
 
 //do blur
 void CatPicture_2App::blur(uint8_t* pixels){
@@ -211,11 +226,7 @@ void CatPicture_2App::setup()
 //Meet one of stretch goals: mouse interaction
 void CatPicture_2App::mouseDown( MouseEvent event )
 {
-	mouse_x = event.getX();
-	mouse_y = event.getY();
-	if(event.isLeft()){
-		console() << mouse_x <<" "<< mouse_y << std::endl;
-	}
+	tint((*mySurface).getData(), event.getX(), event.getY());
 }
 
 void CatPicture_2App::update()
