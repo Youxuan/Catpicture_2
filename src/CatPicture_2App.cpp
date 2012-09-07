@@ -21,129 +21,192 @@ class CatPicture_2App : public AppBasic {
 	void drawCircle(uint8_t* pixels, float radius, float center_x, float center_y);    //draw circle
 	void paintChimney(uint8_t* pixels, Color8u color);   //paint chimney
 	void blur(uint8_t* pixels);   //do blur
+	void tint(uint8_t* pixels, int row, int col);
 
   private:
 	Surface* mySurface;  //The Surface object I modify array on
-	Surface* mySurface_2;  //The Surface we work for blur
 	Color8u colorRoof;
 	Color8u colorWall;
 	Color8u colorWindow;
 	Color8u colorDoor;
 	Color8u colorChimney;
 	Color8u colorSky;
+	float circle_x;
+	float circle_y;
+	int mouse_x;
+	int mouse_y;
 };
 
+/*
+* Possible thoughts:
+*
+* The row major order formula is used quite alot, maybe there
+* could be a function with x and y inputs that performs this 
+* operation, so you don't have to type it in every time.
+*
+* You switch slightly between variables x, y vs. row and col (as used in line drawing methods)
+* Might be beneficial to make sure these stay constant.
+*
+* The blur effect adds alot to the picture. I like how it initially thickens the lines of the house.
+* Also, it totally works for the chimney smoke! That looks awesome!!! Congrats!!!
+* 
+* I really enjoyed the animation and your picture.
+* Good job on everything overall!
+*
+*------------------------------------------ David Gayda
+*/
+
+
+
+/* While using this tint method and the mousedown method, I was able to break your
+* program by drawing a tint circle out of the upper bounds of your app screen.
+* You can add error handling, or a statement in this method to handle it.
+*/
+//tint
+void CatPicture_2App::tint(uint8_t* pixels, int row, int col) {
+
+	//This while loop fixes the problem, and keeps the circles in bounds
+	//Not sure why 30 works but no lower...
+	while(col-30<0) {
+		col++;
+	}
+		for (int x=row-50; x<row+50; x++) {
+			for (int y=col-50; y<col+50; y++) {
+				if(((row-x)*(row-x)+(col-y)*(col-y))<=(30*30)){
+					pixels[(int)(3*(x+(y*1024)))] = 255;
+					pixels[(int)(3*(x+(y*1024)))+1] = 255;
+					pixels[(int)(3*(x+(y*1024)))+2] = 255;
+				}
+			}
+		}
+
+	}
+
+/*This blur works, but the code looks slightly long and redundant. 
+* There is probably a more compact way of doing this, if this had bugs,
+* it'd probably be very tedious trying to change each pixel calculation.
+*
+* Also, your picture becomes darker and overtime, because the blur method is acting upon
+* the unfilled surface. This can be avoided by filling your picture with a background.
+* Though this would ruin how your smoke effect is performed, unless it is implemented differently.
+*/
 
 //do blur
 void CatPicture_2App::blur(uint8_t* pixels){
-	for(int x=0; x<=600; x++){
-		for(int y=0; y<=600; y++){
-			//the first line
-			if(y == 0){
-				if(x == 0){
-				  pixels[3*(x+y*600)] = (pixels[3*(x+y*600)] + pixels[3*((x+1)+y*600)] + pixels[3*((x+2)+y*600)] + pixels[3*(x+(y+1)*600)] + pixels[3*((x+1)+(y+1)*600)] + pixels[3*((x+2)+(y+1)*600)] + pixels[3*(x+(y+2)*600)] + pixels[3*((x+1)+(y+2)*600)] + pixels[3*((x+2)+(y+2)*600)])/9;
-				  pixels[3*(x+y*600)+1] = (pixels[3*(x+y*600)+1] + pixels[3*((x+1)+y*600)+1] + pixels[3*((x+2)+y*600)+1] + pixels[3*(x+(y+1)*600)+1] + pixels[3*((x+1)+(y+1)*600)+1] + pixels[3*((x+2)+(y+1)*600)+1] + pixels[3*(x+(y+2)*600)+1] + pixels[3*((x+1)+(y+2)*600)+1] + pixels[3*((x+2)+(y+2)*600)+1])/9;
-				  pixels[3*(x+y*600)+2] = (pixels[3*(x+y*600)+2] + pixels[3*((x+1)+y*600)+2] + pixels[3*((x+2)+y*600)+2] + pixels[3*(x+(y+1)*600)+2] + pixels[3*((x+1)+(y+1)*600)+2] + pixels[3*((x+2)+(y+1)*600)+2] + pixels[3*(x+(y+2)*600)+2] + pixels[3*((x+1)+(y+2)*600)+2] + pixels[3*((x+2)+(y+2)*600)+2])/9;
-				}
-				else if(x == 600){
-				  pixels[3*(x+y*600)] = (pixels[3*(x+y*600)] + pixels[3*((x-1)+y*600)] + pixels[3*((x-2)+y*600)] + pixels[3*(x+(y-1)*600)] + pixels[3*((x-1)+(y-1)*600)] + pixels[3*((x-2)+(y-1)*600)] + pixels[3*(x+(y-2)*600)] + pixels[3*((x-1)+(y-2)*600)] + pixels[3*((x-2)+(y-2)*600)])/9;
-				  pixels[3*(x+y*600)+1] = (pixels[3*(x+y*600)+1] + pixels[3*((x-1)+y*600)+1] + pixels[3*((x-2)+y*600)+1] + pixels[3*(x+(y-1)*600)+1] + pixels[3*((x-1)+(y-1)*600)+1] + pixels[3*((x-2)+(y-1)*600)+1] + pixels[3*(x+(y-2)*600)+1] + pixels[3*((x-1)+(y-2)*600)+1] + pixels[3*((x-2)+(y-2)*600)+1])/9;
-				  pixels[3*(x+y*600)+2] = (pixels[3*(x+y*600)+2] + pixels[3*((x-1)+y*600)+2] + pixels[3*((x-2)+y*600)+2] + pixels[3*(x+(y-1)*600)+2] + pixels[3*((x-1)+(y-1)*600)+2] + pixels[3*((x-2)+(y-1)*600)+2] + pixels[3*(x+(y-2)*600)+2] + pixels[3*((x-1)+(y-2)*600)+2] + pixels[3*((x-2)+(y-2)*600)+2])/9;
-				}
-				else{
-				  pixels[3*(x+y*600)] = (pixels[3*(x+y*600)] + pixels[3*((x+1)+y*600)] + pixels[3*((x-1)+y*600)] + pixels[3*(x+(y+1)*600)] + pixels[3*((x+1)+(y+1)*600)] + pixels[3*((x-1)+(y+1)*600)] + pixels[3*(x+(y+2)*600)] + pixels[3*((x+1)+(y+2)*600)] + pixels[3*((x-1)+(y+2)*600)])/9;
-				  pixels[3*(x+y*600)+1] = (pixels[3*(x+y*600)+1] + pixels[3*((x+1)+y*600)+1] + pixels[3*((x-1)+y*600)+1] + pixels[3*(x+(y+1)*600)+1] + pixels[3*((x+1)+(y+1)*600)+1] + pixels[3*((x-1)+(y+1)*600)+1] + pixels[3*(x+(y+2)*600)+1] + pixels[3*((x+1)+(y+2)*600)+1] + pixels[3*((x+2)+(y+2)*600)+1])/9;
-				  pixels[3*(x+y*600)+2] = (pixels[3*(x+y*600)+2] + pixels[3*((x+1)+y*600)+2] + pixels[3*((x+2)+y*600)+2] + pixels[3*(x+(y+1)*600)+2] + pixels[3*((x+1)+(y+1)*600)+2] + pixels[3*((x+2)+(y+1)*600)+2] + pixels[3*(x+(y+2)*600)+2] + pixels[3*((x+1)+(y+2)*600)+2] + pixels[3*((x+2)+(y+2)*600)+2])/9;
-				}
+	for(int x=0; x<=1024; x++){
+		for(int y=0; y<=1024; y++){
+			if(x > 0 && x < 1024 && y > 0 && y < 1023){
+				pixels[3*(x+y*1024)] = (pixels[3*(x+y*1024)] + pixels[3*((x+1)+y*1024)] + pixels[3*((x-1)+y*1024)] + pixels[3*((x-1)+(y-1)*1024)] + pixels[3*(x+(y-1)*1024)] + pixels[3*((x+1)+(y-1)*1024)] + pixels[3*((x-1)+(y+1)*1024)] + pixels[3*(x+(y+1)*1024)] + pixels[3*((x+1)+(y+1)*1024)])/9;
+				pixels[3*(x+y*1024)+1] = (pixels[3*(x+y*1024)+1] + pixels[3*((x+1)+y*1024)+2] + pixels[3*((x-1)+y*1024)+1] + pixels[3*((x-1)+(y-1)*1024)+1] + pixels[3*(x+(y-1)*1024)+1] + pixels[3*((x+1)+(y-1)*1024)+1] + pixels[3*((x-1)+(y+1)*1024)+1] + pixels[3*(x+(y+1)*1024)+1] + pixels[3*((x+1)+(y+1)*1024)]+1)/9;
+				pixels[3*(x+y*1024)+2] = (pixels[3*(x+y*1024)+1] + pixels[3*((x+1)+y*1024)+2] + pixels[3*((x-1)+y*1024)+2] + pixels[3*((x-1)+(y-1)*1024)+2] + pixels[3*(x+(y-1)*1024)+2] + pixels[3*((x+1)+(y-1)*1024)+2] + pixels[3*((x-1)+(y+1)*1024)+2] + pixels[3*(x+(y+1)*1024)+2] + pixels[3*((x+1)+(y+1)*1024)]+2)/9;
 			}
-
-			
 
 		}
 	}
 }
 
-//draw horizonal line
+//Meet one of main goals: draw horizonal line
 void CatPicture_2App::drawHorizonalLine(uint8_t* pixels, int start, int end, int row){
 	int draw;
 	for(draw = start; draw <= end; draw++){
-		pixels[3*(draw + row*600)] = 0;
-		pixels[3*(draw + row*600)+1] = 0;
-		pixels[3*(draw + row*600)+2] = 0;
+		pixels[3*(draw + row*1024)] = 0;
+		pixels[3*(draw + row*1024)+1] = 0;
+		pixels[3*(draw + row*1024)+2] = 0;
 	}
 }
 
-//draw vertical line
+//The draw variable name may be slightly confusing.
+//Possible suggestion would be to avoid verbs to name variables
+
+//Meet one of main goals: draw vertical line
 void CatPicture_2App::drawVerticalLine(uint8_t* pixels, int start, int end, int col){
 	int draw;
 	for(draw = start; draw <=end; draw++){
-		pixels[3*(col + draw * 600)] = 0;
-		pixels[3*(col + draw * 600)+1] = 0;
-		pixels[3*(col + draw * 600)+2] = 0;
+		pixels[3*(col + draw * 1024)] = 0;
+		pixels[3*(col + draw * 1024)+1] = 0;
+		pixels[3*(col + draw * 1024)+2] = 0;
 	}
 }
 
-//draw rectangle
+//Meet one of main goals: draw rectangle
 void CatPicture_2App::drawRectangle(uint8_t* pixels, int x1, int y1, int x2, int y2, Color8u color){
+	
 	int draw;
+
+	//Very nice edge lines.
+	//Though this could be incorporated within the other loop
+	//that fills in the rectangle by using an if statement
+	//
+	//Other idea, would be to call your horizontal and vertical line
+	//methods here to avoid redundant lines of code
 
 	//draw horizonal edges
 	for(draw = x1; draw <= x2; draw++){
-		pixels[3*(draw + y1*600)] = 0;
-		pixels[3*(draw + y1*600)+1] = 0;
-		pixels[3*(draw + y1*600)+2] = 0;
+		pixels[3*(draw + y1*1024)] = 0;
+		pixels[3*(draw + y1*1024)+1] = 0;
+		pixels[3*(draw + y1*1024)+2] = 0;
 
-		pixels[3*(draw + y2*600)] = 0;
-		pixels[3*(draw + y2*600)+1] = 0;
-		pixels[3*(draw + y2*600)+2] = 0;
+		pixels[3*(draw + y2*1024)] = 0;
+		pixels[3*(draw + y2*1024)+1] = 0;
+		pixels[3*(draw + y2*1024)+2] = 0;
 	}
 
 	//draw vertical edges
 	for(draw = y1; draw <= y2; draw++){
-		pixels[3*(x1 + draw * 600)] = 0;
-		pixels[3*(x1 + draw * 600)+1] = 0;
-		pixels[3*(x1 + draw * 600)+2] = 0;
+		pixels[3*(x1 + draw * 1024)] = 0;
+		pixels[3*(x1 + draw * 1024)+1] = 0;
+		pixels[3*(x1 + draw * 1024)+2] = 0;
 
-		pixels[3*(x2 + draw * 600)] = 0;
-		pixels[3*(x2 + draw * 600)+1] = 0;
-		pixels[3*(x2 + draw * 600)+2] = 0;
+		pixels[3*(x2 + draw * 1024)] = 0;
+		pixels[3*(x2 + draw * 1024)+1] = 0;
+		pixels[3*(x2 + draw * 1024)+2] = 0;
 	}
 
-	for(int x=0; x<=600; x++){
-		for(int y=0; y<=600; y++){
+	for(int x=0; x<=1024; x++){
+		for(int y=0; y<=1024; y++){
 			if(x>x1 && x<x2 && y>y1 && y<y2){
-				if(pixels[3*(x + y * 600)] != 0 && pixels[3*(x + y * 600)+1] != 0 && pixels[3*(x + y * 600)+2] != 0){
-					pixels[3*(x + y * 600)] = color.r;
-					pixels[3*(x + y * 600)+1] = color.g;
-					pixels[3*(x + y * 600)+2] = color.b;
+				if(pixels[3*(x + y * 1024)] != 0 && pixels[3*(x + y * 1024)+1] != 0 && pixels[3*(x + y * 1024)+2] != 0){
+					pixels[3*(x + y * 1024)] = color.r;
+					pixels[3*(x + y * 1024)+1] = color.g;
+					pixels[3*(x + y * 1024)+2] = color.b;
 				}
 			}
 		}
 	}
 }
 
+// Looks like you may want to implement a rectangle method, instead
+// of creating a whole new way to draw a chimney.
+
 //paint chimney
 void CatPicture_2App::paintChimney(uint8_t* pixels, Color8u color){
-	for(int x=0; x<=600; x++){
-		for(int y=0; y<=600; y++){
+	for(int x=0; x<=1024; x++){
+		for(int y=0; y<=1024; y++){
 			if(x > 101 && x < 149 && y > 220 && y < 300){
-				pixels[3*(x + y * 600)] = color.r;
-				pixels[3*(x + y * 600)+1] = color.g;
-				pixels[3*(x + y * 600)+2] = color.b;
+				pixels[3*(x + y * 1024)] = color.r;
+				pixels[3*(x + y * 1024)+1] = color.g;
+				pixels[3*(x + y * 1024)+2] = color.b;
 			}
 		}
 	}
 }
 
-//draw triangle
+//I like how simple your strategy was to draw yourtriangle.
+// You do have an unused parameter (color) that can be deleted.
+
+//Meet one of main goals: draw triangle
 void CatPicture_2App::drawTriangle(uint8_t* pixels, int x1, int y1, int x2, int y2, int x3, int y3, Color8u color){
+	
+	//This is a very easy way to draw 45 degree angle lines.
+	//Good thinking!
+	
 	//draw the first edge
 	int draw_x2 = x2;
 	int draw_y2 = y2;
 	while(draw_x2 <= x1 && draw_y2 >= y1){
-		pixels[3*(draw_x2 + draw_y2 * 600)] = 0;
-		pixels[3*(draw_x2 + draw_y2 * 600)+1] = 0;
-		pixels[3*(draw_x2 + draw_y2 * 600)+2] = 0;
+		pixels[3*(draw_x2 + draw_y2 * 1024)] = 0;
+		pixels[3*(draw_x2 + draw_y2 * 1024)+1] = 0;
+		pixels[3*(draw_x2 + draw_y2 * 1024)+2] = 0;
 
 		draw_x2++;
 		draw_y2--;
@@ -153,9 +216,9 @@ void CatPicture_2App::drawTriangle(uint8_t* pixels, int x1, int y1, int x2, int 
 	int draw_x3 = x3;
 	int draw_y3 = y3;
 	while(draw_x3 >= x1 && draw_y3 >= y1){
-		pixels[3*(draw_x3 + draw_y3 * 600)] = 0;
-		pixels[3*(draw_x3 + draw_y3 * 600)+1] = 0;
-		pixels[3*(draw_x3 + draw_y3 * 600)+2] = 0;
+		pixels[3*(draw_x3 + draw_y3 * 1024)] = 0;
+		pixels[3*(draw_x3 + draw_y3 * 1024)+1] = 0;
+		pixels[3*(draw_x3 + draw_y3 * 1024)+2] = 0;
 
 		draw_x3--;
 		draw_y3--;
@@ -164,34 +227,43 @@ void CatPicture_2App::drawTriangle(uint8_t* pixels, int x1, int y1, int x2, int 
 	//draw the third edge
 	int draw_x = x2;
 	for(draw_x; draw_x <= x3; draw_x++){
-		pixels[3*(draw_x + 350 * 600)] = 0;
-		pixels[3*(draw_x + 350 * 600)+1] = 0;
-		pixels[3*(draw_x + 350 * 600)+2] = 0;
+		pixels[3*(draw_x + 350 * 1024)] = 0;
+		pixels[3*(draw_x + 350 * 1024)+1] = 0;
+		pixels[3*(draw_x + 350 * 1024)+2] = 0;
 	}
 	
+	//I'm not sure why this section uses new ints, paint
+	// looks like you can just keep using x1 and y1.
+	int paint_x = x1;
+	int paint_y = y1;
+	for(paint_x; paint_x > x2; paint_x--){
+		for(paint_y; paint_y < y2; paint_y++){
+			pixels[3*(paint_x + paint_y * 1024)] = 0;
+			pixels[3*(paint_x + paint_y * 1024)+1] = 0;
+			pixels[3*(paint_x + paint_y * 1024)+2] = 0;
+		}
+	}
+
 }
 
+//Meet one of main goals: Draw circle
 void CatPicture_2App::drawCircle(uint8_t* pixels, float radius, float center_x, float center_y){
 	
-	for(int y=0; y<=600; y++){
-		for(int x=0;x<=600; x++){
-
+	for(int y=0; y<=1024; y++){
+		for(int x=0;x<=1024; x++){
 			if ((pow(x-center_x,2) + (pow(y-center_y,2))) <= (pow(radius,2))){
-				pixels[3*(x + y*600)] = 255;
-				pixels[3*(x + y*600)+1] = 255;
-				pixels[3*(x + y*600)+2] = 255;
+				pixels[3*(x + y*1024)] = 255;
+				pixels[3*(x + y*1024)+1] = 255;
+				pixels[3*(x + y*1024)+2] = 255;
 			}
 		}
 	}
 
 }
 
-
-
 void CatPicture_2App::setup()
 {
-	mySurface = new Surface(600,600,false);
-	mySurface_2 = mySurface;
+	mySurface = new Surface(1024,1024,false);
 
 	colorWall.r = 237;
 	colorWall.g = 28;
@@ -216,10 +288,23 @@ void CatPicture_2App::setup()
 	colorSky.r = 0;
 	colorSky.g = 162;
 	colorSky.b = 232;
+
+	circle_x = 120;
+	circle_y = 145;
+
+
 }
 
+/*This mouse interaction works well, but only on the non drawn surface area.
+* This happens because your circle tint isn't being drawn through the draw update loop.
+* A possible way to fix this, is to add some sort of link list that is updated when the mouse is clicked.
+* That way you can check and update the list within the update draw loop. Allowing the circle to be displayed
+* everywhere.
+*/
+//Meet one of stretch goals: mouse interaction
 void CatPicture_2App::mouseDown( MouseEvent event )
 {
+	tint((*mySurface).getData(), event.getX(), event.getY());
 }
 
 void CatPicture_2App::update()
@@ -274,9 +359,16 @@ void CatPicture_2App::update()
 	drawTriangle(dataArray, 255, 143, 50, 348, 460, 348, colorRoof);
 
 	//draw circle of smoke
-	drawCircle(dataArray, 20, 120, 145);
-	drawCircle(dataArray, 35, 200, 100);
-	drawCircle(dataArray, 45, 310, 50);
+	drawCircle(dataArray, 20, circle_x, circle_y);
+
+	//Meet one of stretch goals: Animation
+	circle_y = 30*cos(circle_x/20)+130;
+	circle_x += 2;
+	if(circle_x > 1024)
+		circle_x = 120;
+
+	blur(dataArray);
+
 
 }
 
@@ -287,7 +379,7 @@ void CatPicture_2App::draw()
 
 // Set size of window.
 void CatPicture_2App::prepareSettings(Settings *settings){
-	settings -> setWindowSize(600,600);
+	settings -> setWindowSize(1024,1024);
 }
 
 CINDER_APP_BASIC( CatPicture_2App, RendererGl )
